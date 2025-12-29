@@ -13,7 +13,7 @@ import { format } from "date-fns";
 
 export default function Analytics() {
   const [searchParams] = useSearchParams();
-  const fileId = searchParams.get("fileId") || "demo";
+  const fileId = searchParams.get("fileId") || "latest";
   
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -26,12 +26,15 @@ export default function Analytics() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [analyticsData, options] = await Promise.all([
-          apiService.getAnalytics(fileId),
-          apiService.getFilterOptions(fileId),
-        ]);
+        const analyticsData = await apiService.getAnalytics(fileId);
         setData(analyticsData);
-        setFilterOptions(options);
+        setFilterOptions({
+          users: analyticsData.tableData.map((row) => ({
+            id: row.id,
+            name: row.name,
+          })),
+          categories: analyticsData.categoryDistribution.map((entry) => entry.name),
+        });
       } catch (error) {
         console.error("Failed to fetch analytics:", error);
       } finally {
@@ -78,16 +81,25 @@ export default function Analytics() {
   }
 
   const tableColumns = [
-    { key: "date", label: "Date", sortable: true },
-    { key: "user", label: "User", sortable: true },
-    { key: "category", label: "Category", sortable: true },
-    { 
-      key: "value", 
-      label: "Value", 
+    { key: "name", label: "User", sortable: true },
+    {
+      key: "messages",
+      label: "Messages",
       sortable: true,
-      format: (val: unknown) => new Intl.NumberFormat('en-US').format(val as number),
+      format: (val: unknown) => new Intl.NumberFormat("en-US").format(val as number),
     },
-    { key: "status", label: "Status", sortable: true },
+    {
+      key: "replies",
+      label: "Replies",
+      sortable: true,
+      format: (val: unknown) => new Intl.NumberFormat("en-US").format(val as number),
+    },
+    {
+      key: "contribution",
+      label: "Contribution",
+      sortable: true,
+      format: (val: unknown) => `${Number(val).toFixed(2)}%`,
+    },
   ];
 
   return (
@@ -143,36 +155,73 @@ export default function Analytics() {
 
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <LineChart
-            data={data.timeSeriesData}
-            title="Activity Over Time"
-          />
+          <LineChart data={data.timeSeriesData} title="Messages Over Time" />
           <DonutChart
             data={data.categoryDistribution}
-            title="Category Distribution"
+            title="Message Types"
           />
         </div>
 
         {/* Charts Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <BarChart data={data.topUsers} title="Top Users" horizontal />
           <BarChart
-            data={data.topUsers}
-            title="Top Users"
-            horizontal
-          />
-          <BarChart
-            data={data.categoryDistribution.map(c => ({ name: c.name, value: c.value }))}
-            title="Categories Comparison"
+            data={data.weekdayActivity}
+            title="Weekday Activity"
             horizontal={false}
           />
+        </div>
+
+        {/* Top Words + Emojis */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="card-elevated p-6 animate-slide-up">
+            <h3 className="text-base font-semibold text-foreground mb-4">Top Words</h3>
+            {data.topWords.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No words available.</p>
+            ) : (
+              <div className="space-y-2">
+                {data.topWords.slice(0, 12).map((entry, index) => (
+                  <div
+                    key={`${entry.word}-${index}`}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="text-foreground">{entry.word}</span>
+                    <span className="text-muted-foreground">
+                      {new Intl.NumberFormat("en-US").format(entry.count)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="card-elevated p-6 animate-slide-up">
+            <h3 className="text-base font-semibold text-foreground mb-4">Top Emojis</h3>
+            {data.topEmojis.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No emojis available.</p>
+            ) : (
+              <div className="space-y-2">
+                {data.topEmojis.slice(0, 12).map((entry, index) => (
+                  <div
+                    key={`${entry.emoji}-${index}`}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="text-foreground">{entry.emoji}</span>
+                    <span className="text-muted-foreground">
+                      {new Intl.NumberFormat("en-US").format(entry.count)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Data Table */}
         <DataTable
           data={data.tableData}
           columns={tableColumns}
-          title="Detailed Records"
-          searchPlaceholder="Search records..."
+          title="User Breakdown"
+          searchPlaceholder="Search users..."
         />
       </div>
     </div>

@@ -1,0 +1,9 @@
+beautifulsoup4
+fastapi
+flask
+lxml
+matplotlib
+python-multipart
+pandas
+seaborn
+uvicorn

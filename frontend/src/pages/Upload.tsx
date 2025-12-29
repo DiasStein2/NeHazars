@@ -6,16 +6,20 @@ import { toast } from "@/hooks/use-toast";
 export default function Upload() {
   const navigate = useNavigate();
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (files: File[]) => {
     try {
-      const response = await apiService.uploadFile(file);
+      const response = await apiService.uploadFile(files);
       
       if (response.success) {
+        const fileCount = files.length;
         toast({
           title: "Upload successful",
-          description: `${response.fileName} has been processed.`,
+          description:
+            fileCount > 1
+              ? `${fileCount} files have been processed.`
+              : `${response.fileName} has been processed.`,
         });
-        
+
         // Navigate to analytics with the file ID
         setTimeout(() => {
           navigate(`/analytics?fileId=${response.fileId}`);
@@ -32,31 +36,34 @@ export default function Upload() {
         <div className="w-full max-w-2xl mx-auto text-center">
           <div className="mb-10 animate-fade-in">
             <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
-              Upload Your Data
+              Upload Your Telegram Exports
             </h1>
             <p className="text-lg text-muted-foreground max-w-md mx-auto">
-              Drop your file below to generate beautiful analytics and insights instantly.
+              Drop one or more Telegram HTML exports below to generate chat analytics.
             </p>
           </div>
 
           <FileUploader
             onUpload={handleUpload}
-            acceptedTypes={['.json', '.csv', '.txt']}
+            acceptedTypes={[".html", ".htm"]}
             className="animate-slide-up"
           />
 
-          <div className="mt-12 grid grid-cols-3 gap-6 max-w-lg mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div
+            className="mt-12 grid grid-cols-3 gap-6 max-w-lg mx-auto animate-fade-in"
+            style={{ animationDelay: "0.2s" }}
+          >
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground">50MB</div>
               <div className="text-sm text-muted-foreground">Max file size</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">3</div>
-              <div className="text-sm text-muted-foreground">File formats</div>
+              <div className="text-2xl font-bold text-foreground">HTML</div>
+              <div className="text-sm text-muted-foreground">Export format</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">∞</div>
-              <div className="text-sm text-muted-foreground">Data rows</div>
+              <div className="text-2xl font-bold text-foreground">Fast</div>
+              <div className="text-sm text-muted-foreground">Processing</div>
             </div>
           </div>
         </div>
