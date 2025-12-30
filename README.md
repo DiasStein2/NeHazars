@@ -4,10 +4,66 @@ A full-stack app that turns Telegram HTML exports into analytics. Upload one or 
 `messages*.html` files, then explore message volume over time, activity by hour and
 weekday, top users, content types, top words, and emoji usage.
 
-## Features
+## ✨ Features
 - Upload one or multiple Telegram HTML export files.
 - Aggregated dashboard with KPIs, charts, and per-user breakdown.
-- Top words and emojis extracted from message content.
+- 
+- 📈 Message statistics
+  - Messages per user
+  - Messages per day / hour
+  - Active days
+  - Average message length
+- 💬 Conversation analysis
+  - Conversation starters
+  - Replies & reply chains
+- 😂 Content insights
+  - Top emojis
+  - Top words
+- 👥 Group analytics
+  - Most active users
+  - Participation distribution
+- 📊 Visualization-ready outputs (tables & charts)
+
+---
+
+## 📦 Supported Input
+
+- Telegram Desktop **HTML exports**
+- Files like:
+  - `messages.html`
+  - `messages1.html`
+  - `messages2.html`
+- Optional media folders (photos/videos are ignored for stats)
+
+> ⚠️ Mobile exports are **not supported**.  
+> Use **Telegram Desktop only**.
+
+---
+
+## 🧭 How to Export Telegram Chat
+
+### Step 1: Export chat history
+
+In **Telegram Desktop**:
+
+Open chat → ⋮ (three dots) → Export chat history
+
+<img width="843" height="681" alt="Screenshot 2025-12-30 150638" src="https://github.com/user-attachments/assets/407954fa-0b6f-46df-8b30-e1b638665a1f" />
+
+ChatExport_YYYY-MM-DD/
+├── messages.html
+├── messages1.html
+├── messages2.html
+├── ...
+├── photos/
+├── videos/
+└── files/
+
+<img width="827" height="1074" alt="Screenshot 2025-12-30 141334" src="https://github.com/user-attachments/assets/bac32c94-1e0b-4a0a-bf99-43dd277c0c1c" />
+
+
+
+Developer Part
 
 ## Tech Stack
 - Backend: FastAPI + pandas + BeautifulSoup
